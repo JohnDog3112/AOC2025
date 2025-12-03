@@ -6,19 +6,15 @@ struct Range {
 fn part1(inp: &Vec<Range>) -> u64 {
     let mut sum = 0;
     for range in inp {
-        'outer: for num in range.min..=range.max {
+        for num in range.min..=range.max {
             let st = num.to_string();
             if st.len() % 2 == 1 {
                 continue;
             }
             let st = st.chars().collect::<Vec<_>>();
-            for i in 0..st.len() / 2 {
-                if st[i] != st[st.len() / 2 + i] {
-                    continue 'outer;
-                }
+            if st[0..st.len() / 2] == st[st.len() / 2..] {
+                sum += num;
             }
-
-            sum += num;
         }
     }
 
@@ -36,11 +32,10 @@ fn part2(inp: &Vec<Range>) -> u64 {
                 if st.len() % len != 0 {
                     continue;
                 }
-                for i in 0..len {
-                    for j in 1..st.len() / len {
-                        if st[i] != st[j * len + i] {
-                            continue 'inner;
-                        }
+                for j in 1..st.len() / len {
+                    let offset = j * len;
+                    if st[0..len] != st[offset..offset + len] {
+                        continue 'inner;
                     }
                 }
                 sum += num;
