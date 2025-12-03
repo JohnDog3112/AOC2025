@@ -22,29 +22,24 @@ fn part1(inp: &Vec<Range>) -> u64 {
 }
 
 fn part2(inp: &Vec<Range>) -> u64 {
-    let mut sum = 0;
-    for range in inp {
-        'outer: for num in range.min..=range.max {
-            let st = num.to_string();
-            let st = st.chars().collect::<Vec<_>>();
-
-            'inner: for len in 1..=st.len() / 2 {
-                if st.len() % len != 0 {
-                    continue;
-                }
-                for j in 1..st.len() / len {
-                    let offset = j * len;
-                    if st[0..len] != st[offset..offset + len] {
-                        continue 'inner;
-                    }
-                }
-                sum += num;
-                continue 'outer;
-            }
-        }
-    }
-
-    sum
+    inp.iter()
+        .map(|range| {
+            (range.min..=range.max)
+                .into_iter()
+                .map(|num| (num, num.to_string()))
+                .filter(|(_, st)| {
+                    (1..=st.len() / 2).any(|len| {
+                        st.len() % len == 0
+                            && (1..st.len() / len)
+                                .map(|val| val * len)
+                                .all(|o| st[0..len] == st[o..o + len])
+                    })
+                })
+                .unzip::<_, _, Vec<_>, Vec<_>>()
+                .0
+        })
+        .flatten()
+        .sum()
 }
 
 fn main() {
