@@ -21,8 +21,7 @@ fn part1(inp: &Vec<Vec<u32>>) -> u32 {
 fn part2(inp: &Vec<Vec<u32>>) -> u128 {
     inp.into_iter()
         .map(|bank| {
-            let nums = bank
-                .into_iter()
+            bank.into_iter()
                 .enumerate()
                 .fold([0; 12], |mut nums, (i, &next)| {
                     for (j, &num) in nums.iter().enumerate() {
@@ -33,9 +32,8 @@ fn part2(inp: &Vec<Vec<u32>>) -> u128 {
                         }
                     }
                     nums
-                });
-
-            nums.into_iter()
+                })
+                .into_iter()
                 .fold(0, |acc, next| acc * 10 + (next as u128))
         })
         .sum()
