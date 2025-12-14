@@ -386,49 +386,55 @@ fn part2(inp: &Vec<Machine>) -> usize {
 
             fn recurse(
                 remaining: usize,
-                vars: HashMap<usize, i128>,
+                index: usize,
+                vars: &mut HashMap<usize, i128>,
                 vars_set: &Vec<usize>,
                 sum: &VarRegEntry,
                 vars_reg: &Vec<VarRegEntry>,
-            ) -> (usize, HashMap<usize, i128>) {
+            ) -> usize {
                 for reg in vars_reg {
                     if let Some(frac) = reg.compute(&vars) {
                         if frac.div != 1 || frac.num < 0 {
-                            return (usize::MAX, vars);
+                            return usize::MAX;
                         }
                     }
                 }
 
-                if vars.len() == vars_set.len() {
+                if index == vars_set.len() {
                     if let Some(frac) = sum.compute(&vars) {
                         if frac.div != 1 || frac.num <= 0 {
-                            return (usize::MAX, vars);
+                            return usize::MAX;
                         } else {
-                            return (frac.num as usize, vars);
+                            return frac.num as usize;
                         }
                     } else {
-                        return (usize::MAX, vars);
+                        return usize::MAX;
                     }
                 }
 
-                let mut min_vars = vars.clone();
+                // let mut min_vars = vars.clone();
                 let mut min = usize::MAX;
                 for i in 0..=remaining {
-                    let mut new_vars = vars.clone();
-                    new_vars.insert(vars_set[vars.len()], i as i128);
-                    let res = recurse(remaining - i, new_vars, vars_set, sum, vars_reg);
-                    if res.0 < min {
-                        min = res.0;
-                        min_vars = res.1;
+                    if let Some(val) = vars.get_mut(&vars_set[index]) {
+                        *val = i as i128;
+                    } else {
+                        vars.insert(vars_set[index], i as i128);
+                    }
+                    let res = recurse(remaining - i, index + 1, vars, vars_set, sum, vars_reg);
+                    if res < min {
+                        min = res;
+                        // min_vars = res.1;
                     }
                 }
+                vars.remove(&vars_set[index]);
 
-                (min, min_vars)
+                min
             }
 
             let val = recurse(
                 machine.joltages.iter().sum(),
-                HashMap::new(),
+                0,
+                &mut HashMap::new(),
                 &vars_set,
                 &sum,
                 &vars_reg,
@@ -438,7 +444,7 @@ fn part2(inp: &Vec<Machine>) -> usize {
             //     println!("[ {:5} ]", reg.compute(&val.1).unwrap().as_str());
             // }
             // println!("\n\n\n");
-            val.0
+            val
             // unreachable!()
         })
         .sum()
